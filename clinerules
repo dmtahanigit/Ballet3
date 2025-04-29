@@ -1,0 +1,151 @@
+processes:
+  test_generation:
+    patterns:
+      - "*test*"
+    prompt: "For which folder?"
+    
+    folder_patterns:
+      - "*test*{folder}"
+    
+    steps:
+      1:
+        name: "Verify folder exists and contains service.yml"
+        action: "ls {folder}"
+        checkpoint: true
+        validate: "Check if service.yml exists"
+        on_error: "The specified folder '{folder}' does not contain a kong service configuration. Quit test generation process."
+
+      2:
+        name: "Check for optional params.yml file"
+        action: "ls {folder}"
+        checkpoint: false
+        validate: "Check if params.yml exists, if it doesn't send a notice to the user that no parameters file was found. Let them know they have the option to include one for more advanced testing."
+
+      3:
+        name: "Write initial tests with response logging"
+        action: |
+          Generate a Vitest testing file based on the provided Kong declarative config and service details. Your output should be a JavaScript file that contains a series of test requests with response logging.
+
+          Objective:
+          Create a diverse set of API requests with basic status assertions and detailed response logging to analyze the actual responses.
+
+          Output Structure:
+          Each test should:
+          1. Make the request
+          2. Log the response details:
+             ```javascript
+             console.log(`\n=== ${testName} ===`);
+             console.log('Headers:', JSON.stringify(response.headers, null, 2));
+             console.log('Body:', JSON.stringify(response.data, null, 2));
+             ```
+          3. Assert the status code
+
+          Request Configuration:
+          Each request object should contain:
+          - hostname: http://localhost:8000
+          - name: A descriptive name explaining the purpose of the request
+          - method: The HTTP method (GET, POST, PUT, DELETE, etc.)
+          - uri: The full URI path, including the leading slash
+          - headers: An object containing important, non-common headers
+          - body: The request body (if applicable, e.g., for POST requests)
+          - query_params: An object containing query parameters (if applicable)
+
+          Guidelines:
+          1. Vary methods, URI paths, headers, and parameters across requests.
+          2. Include a wide range of error scenarios:
+             - Invalid paths
+             - Missing required parameters
+             - Invalid input types
+             - Out-of-range values
+             - Unauthorized access attempts
+          3. Include parameters found in params.yml as a global variable that can be used within tests.
+          4. When creating invalid inputs:
+             - Change more than one character from the valid value
+             - Use special characters, wildcards, or regex patterns for parameters defined in the Kong service config
+             - Try unusual symbols or extremely long strings to test for potential crashes
+          5. Generate requests that test:
+             - Edge cases (e.g., minimum/maximum values)
+             - Different data types (strings, numbers, booleans, arrays, objects)
+             - Empty or null values
+             - Case sensitivity
+          6. Include security-focused tests:
+             - SQL injection attempts
+             - Cross-site scripting (XSS) payloads
+             - Large payloads to test for buffer overflows
+             - Malformed JSON or XML in the body
+          7. Do not include the ~ for kong routes, the tilde just enforces that the uri must start with the specified string rather than being a wildcard in front of the string.
+        checkpoint: true
+        output: "{folder}/{folder}.test.js"
+      
+      4:
+        name: "Run initial tests"
+        action: |
+          Run the tests generated in the previous step using Vitest. 
+          The console output will show the response headers and bodies for each test.
+          Review the output to identify important headers and response body fields for assertions.
+        checkpoint: true
+        on_error: "Check if there are errors like ECONNREFUSED which means the server cannot be connected to. If you find those then just tell the user to check connectivity and quit the process. Otherwise, try and fix the tests"
+
+      5:
+        name: "Add comprehensive assertions"
+        action: |
+          Based on the test run output from step 4, update the test file to include assertions for headers and response bodies.
+
+          Updates to make:
+          1. Comment out the console.log statements (keep them for future debugging)
+          2. Add header assertions for each test:
+             - Common headers (e.g., content-type, x-kong-proxy-latency)
+             - Kong-specific headers
+             - Custom headers specific to the endpoint
+          3. Add response body assertions:
+             - Verify response structure (object vs array)
+             - Check for required fields
+             - Validate data types of important fields
+             - Assert specific values where applicable
+          4. Add performance assertions:
+             - Response time expectations
+             - Latency thresholds
+
+          Example assertions:
+          ```javascript
+          // Header assertions
+          expect(response.headers['content-type']).toMatch(/application\/json/);
+          expect(response.headers).toHaveProperty('x-kong-proxy-latency');
+          
+          // Body assertions
+          expect(response.data).toHaveProperty('key');
+          expect(typeof response.data.key).toBe('string');
+          
+          // Performance assertions
+          expect(parseInt(response.headers['x-kong-proxy-latency'])).toBeLessThan(1000);
+          ```
+        checkpoint: true
+        output: "{folder}/{folder}.test.js"
+
+      6:
+        name: "Verify enhanced tests"
+        action: |
+          Run the enhanced tests to verify all new assertions pass.
+          If any assertions fail:
+          1. Review the actual values vs expected values
+          2. Adjust assertions based on actual service behavior
+          3. Re-run tests to confirm fixes
+        checkpoint: true
+        on_error: "Review failed assertions and adjust expectations based on actual service behavior"
+
+      6:
+        name: "Remove "
+        action: |
+          Run the enhanced tests to verify all new assertions pass.
+          If any assertions fail:
+          1. Review the actual values vs expected values
+          2. Adjust assertions based on actual service behavior
+          3. Re-run tests to confirm fixes
+        checkpoint: true
+        on_error: "Review failed assertions and adjust expectations based on actual service behavior"
+
+    variables:
+      folder:
+        type: "string"
+        required: true
+        description: "Target folder for test generation"
