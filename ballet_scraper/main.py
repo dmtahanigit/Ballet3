@@ -228,12 +228,34 @@ def scrape_individual_page(driver, url):
         
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         
-        # Simple selector for description
+        # Enhanced selectors for description
         description = "Description not found"
-        desc_elem = soup.find('div', class_='show__description') or soup.find('div', class_='description')
-        if desc_elem:
-            description = desc_elem.text.strip()
-            logger.info("Found performance description")
+        desc_selectors = [
+            ('div', {'class_': 'show__description'}),
+            ('div', {'class_': 'description'}),
+            ('div', {'class_': 'performance-description'}),
+            ('div', {'class_': 'show-description'}),
+            ('div', {'class_': 'content-description'}),
+            ('div', {'itemprop': 'description'}),
+            ('meta', {'property': 'og:description'}),
+            ('p', {'class_': 'description'})
+        ]
+        
+        for tag, attrs in desc_selectors:
+            desc_elem = soup.find(tag, attrs)
+            if desc_elem:
+                if tag == 'meta':
+                    description = desc_elem.get('content', '').strip()
+                else:
+                    description = desc_elem.text.strip()
+                if description and description != "Description not found":
+                    logger.info(f"Found performance description using selector: {tag}, {attrs}")
+                    break
+        
+        # Save debug info if description not found
+        if description == "Description not found":
+            logger.warning("Description not found with any selector")
+            save_debug_info(driver)
         
         # Simple selector for video links
         video_links = []

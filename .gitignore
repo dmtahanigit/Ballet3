@@ -40,6 +40,9 @@ env/
 ehthumbs.db
 Thumbs.db
 
+# Environment variables
+.env
+
 # Debug files
 debug_*.html
 debug_*.png

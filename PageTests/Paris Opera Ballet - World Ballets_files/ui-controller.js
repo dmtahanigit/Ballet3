@@ -216,7 +216,7 @@ const UIController = (() => {
             return;
         }
         
-        // Create performance items
+        // Create performance items for all performances
         filteredPerformances.forEach((performance, index) => {
             const performanceItem = document.createElement('div');
             performanceItem.className = 'performance-item';
@@ -228,74 +228,57 @@ const UIController = (() => {
                 performanceItem.classList.add('next-show');
             }
             
-            // Create header
-            const header = document.createElement('div');
-            header.className = 'performance-header';
+            // Enhanced logging to diagnose description issue
+            console.log('Performance data for ' + performance.title + ':', {
+                title: performance.title,
+                description: performance.description,
+                descriptionLength: performance.description ? performance.description.length : 0,
+                hasDescription: !!performance.description,
+                startDate: performance.startDate,
+                endDate: performance.endDate,
+                formattedDateRange: DataService.formatDateRange(performance.startDate, performance.endDate)
+            });
             
-            let headerContent = `
-                <div>
-                    <h3 class="performance-title">${performance.title}</h3>
-                    <p class="performance-dates">${DataService.formatDateRange(performance.startDate, performance.endDate)}</p>
+            // Log the raw performance object
+            console.log('Raw performance object:', JSON.stringify(performance, null, 2));
+            
+            performanceItem.innerHTML = `
+                <div class="performance-header">
+                    <div>
+                        <h3 class="performance-title">${performance.title}</h3>
+                        <p class="performance-dates">${DataService.formatDateRange(performance.startDate, performance.endDate)}</p>
+                    </div>
+                    ${performance.isCurrent ? '<span class="performance-tag current-tag">Current Performance</span>' : ''}
+                    ${performance.isNext ? '<span class="performance-tag next-tag">Next Performance</span>' : ''}
                 </div>
-            `;
-            
-            // Add tags for current and next shows
-            if (performance.isCurrent) {
-                headerContent += '<span class="performance-tag current-tag">Current Performance</span>';
-            } else if (performance.isNext) {
-                headerContent += '<span class="performance-tag next-tag">Next Performance</span>';
-            }
-            
-            header.innerHTML = headerContent;
-            performanceItem.appendChild(header);
-            
-            // Create content
-            const content = document.createElement('div');
-            content.className = 'performance-content';
-            
-            // Media section
-            const media = document.createElement('div');
-            media.className = 'performance-media';
-            media.innerHTML = `
-                <img src="${performance.image}" alt="${performance.title}" class="performance-image">
-                ${performance.videoUrl ? '<button class="performance-video-btn" aria-label="Play video">▶</button>' : ''}
+                <div class="performance-content">
+                    <div class="performance-media">
+                        <img src="${performance.image}" alt="${performance.title}" class="performance-image" loading="lazy" onerror="console.error('Failed to load image:', this.src); this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\'><rect width=\'800\' height=\'400\' fill=\'%23cccccc\'/><text x=\'400\' y=\'200\' font-family=\'Arial\' font-size=\'32\' fill=\'%23666666\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Paris Ballet Performance</text></svg>';">
+                        ${performance.videoUrl ? '<button class="performance-video-btn" aria-label="Play video">▶</button>' : ''}
+                    </div>
+                    <div class="performance-details">
+                        <div class="performance-description">
+                            ${performance.description || 'No description available'}
+                        </div>
+                    </div>
+                </div>
             `;
             
             // Add video modal functionality if video exists
             if (performance.videoUrl) {
-                const videoBtn = media.querySelector('.performance-video-btn');
+                const videoBtn = performanceItem.querySelector('.performance-video-btn');
                 videoBtn.addEventListener('click', () => {
                     openVideoModal(performance.videoUrl, performance.title);
                 });
             }
             
-            // Details section
-            const details = document.createElement('div');
-            details.className = 'performance-details';
-            
-            const description = document.createElement('div');
-            description.className = 'performance-description collapsed';
-            description.textContent = performance.description;
-            
-            const readMoreBtn = document.createElement('button');
-            readMoreBtn.className = 'read-more-btn';
-            readMoreBtn.textContent = 'Read More';
-            readMoreBtn.addEventListener('click', () => {
-                description.classList.toggle('collapsed');
-                readMoreBtn.textContent = description.classList.contains('collapsed') ? 'Read More' : 'Read Less';
-            });
-            
-            details.appendChild(description);
-            details.appendChild(readMoreBtn);
-            
-            content.appendChild(media);
-            content.appendChild(details);
-            performanceItem.appendChild(content);
             
             container.appendChild(performanceItem);
         });
-        
-        // Initialize observers for new elements
+
+        // No "Load More" button - all performances are displayed at once
+
+        // Initialize observers for initial elements
         initObservers();
     };
     

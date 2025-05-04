@@ -9,16 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize UI
     UIController.init();
     
-    // Get company ID from the current URL
-    // Example: /companies/nbc.html -> nbc
-    const path = window.location.pathname;
-    const filename = path.substring(path.lastIndexOf('/') + 1);
-    const companyId = filename.replace('.html', '');
-    
-    if (!companyId) {
-        console.error('Company ID not found in URL');
-        return;
-    }
+    // Set company ID for Paris Opera Ballet
+    const companyId = 'paris-opera-ballet';
     
     // Load company information
     DataService.getCompanyInfo(companyId)
@@ -37,6 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 logoImg.src = company.logo;
                 logoImg.alt = `${company.name} Logo`;
             }
+            
+            // Add global image error handler for debugging
+            document.addEventListener('error', function(e) {
+                if (e.target.tagName.toLowerCase() === 'img') {
+                    console.error('Image loading error:', e.target.src);
+                    console.log('Image element:', e.target);
+                }
+            }, true);
             
             // Update company name and description
             const companyNameElement = document.querySelector('.company-info h1');

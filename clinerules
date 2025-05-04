@@ -149,3 +149,210 @@ processes:
         type: "string"
         required: true
         description: "Target folder for test generation"
+
+# Ballet Scraper Project Intelligence
+ballet_scraper:
+  context_window_optimization:
+    description: "Strategies to avoid context window errors when debugging frontend issues"
+    patterns:
+      - When debugging frontend issues, especially the thumbnail rendering problem, we encounter context window errors that limit our ability to process large amounts of code or data at once
+      - These errors occur when trying to analyze multiple large files simultaneously or when processing large datasets
+      - The thumbnail rendering issue involves multiple components (database, API, frontend) which increases complexity
+    
+    strategies:
+      surgical_editing:
+        - Precision Targeting: Identify the exact lines of code that need modification
+        - Minimal Changes: Make only the necessary changes to fix the issue
+        - Sequential Processing: Handle one file at a time to minimize memory usage
+        - Verification Steps: Verify each change before proceeding to the next
+        
+      modular_approach:
+        - Targeted File Analysis: Only load specific files directly related to the issue
+        - Incremental Processing: Analyze one component at a time rather than loading the entire codebase
+        - Strategic Sampling: Examine representative samples of data rather than complete datasets
+      
+      efficient_debugging:
+        - Focused Debugging: Target specific functions rather than entire files
+        - Component Isolation: Extract and test problematic components independently
+        - Minimal Reproduction: Create minimal test cases that reproduce the issue
+      
+      implementation_techniques:
+        - Lazy Loading: Load resources only when needed
+        - Chunked Processing: Process data in manageable chunks
+        - Strategic Memoization: Cache results to avoid recomputation
+        - Event Delegation: Use event delegation for multiple similar elements
+    
+    testing_strategies:
+      automated_verification_scripts:
+        - Create lightweight JavaScript snippets that target only specific DOM elements
+        - Extract minimal verification data (e.g., presence/absence of classes, element counts)
+        - Output results in compact JSON format for easy analysis
+        example: |
+          // Verification script for description display
+          (() => {
+            // Target only what we need to check
+            const descriptions = document.querySelectorAll('.performance-description');
+            const readMoreButtons = document.querySelectorAll('.read-more-btn');
+            
+            // Capture only essential data
+            const results = {
+              descriptionCount: descriptions.length,
+              hasCollapsedClass: Array.from(descriptions).some(d => d.classList.contains('collapsed')),
+              readMoreButtonCount: readMoreButtons.length,
+              descriptionTextSamples: Array.from(descriptions).map(d => d.textContent.length)
+            };
+            
+            // Output minimal data to console
+            console.log(JSON.stringify(results));
+          })();
+      
+      diagnostic_api_endpoints:
+        - Add temporary endpoints to the API server for testing specific functionality
+        - Return only the minimal data needed for verification
+        - Avoid loading entire page content for testing
+        example: |
+          @app.route('/api/debug/description-test', methods=['GET'])
+          def debug_description():
+              """Lightweight endpoint that returns only description data for testing"""
+              try:
+                  sample = collection.find_one({}, {'_id': 0, 'description': 1})
+                  return jsonify({
+                      "description_sample": sample.get('description', ''),
+                      "description_length": len(sample.get('description', ''))
+                  })
+              except Exception as e:
+                  return jsonify({'error': str(e)}), 500
+      
+      dom_diffing:
+        - Capture and compare only relevant DOM structures before and after changes
+        - Focus on specific attributes (classes, text content) rather than entire elements
+        - Use functional approach to transform DOM into lightweight data structures
+        example: |
+          function captureDescriptionState() {
+            return Array.from(document.querySelectorAll('.performance-item')).map(item => {
+              const desc = item.querySelector('.performance-description');
+              return {
+                title: item.querySelector('.performance-title').textContent,
+                hasCollapsedClass: desc.classList.contains('collapsed'),
+                hasReadMoreBtn: !!item.querySelector('.read-more-btn'),
+                textLength: desc.textContent.length,
+                truncated: desc.textContent.includes('...')
+              };
+            });
+          }
+      
+      memory_optimized_browser_testing:
+        - Use headless browser testing with targeted extraction
+        - Create scripts that extract only verification data points
+        - Process results incrementally to avoid memory pressure
+        example: |
+          const puppeteer = require('puppeteer');
+
+          (async () => {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto('file://${PWD}/PageTests/Paris Opera Ballet - World Ballets.html');
+            
+            // Wait for content to load
+            await page.waitForSelector('.performance-description');
+            
+            // Extract only what we need to verify
+            const results = await page.evaluate(() => {
+              const descriptions = document.querySelectorAll('.performance-description');
+              return {
+                count: descriptions.length,
+                hasCollapsed: Array.from(descriptions).some(d => d.classList.contains('collapsed')),
+                hasReadMore: document.querySelectorAll('.read-more-btn').length > 0,
+                textLengths: Array.from(descriptions).map(d => d.textContent.length)
+              };
+            });
+            
+            console.log(JSON.stringify(results, null, 2));
+            await browser.close();
+          })();
+      
+      incremental_state_verification:
+        - Implement a state machine approach to testing
+        - Verify one aspect at a time (existence, classes, content)
+        - Build confidence incrementally without exceeding context limits
+        example: |
+          // Step 1: Verify descriptions exist
+          const descriptionsExist = document.querySelectorAll('.performance-description').length > 0;
+          console.log('Step 1: Descriptions exist:', descriptionsExist);
+          
+          // Step 2: Verify no collapsed class
+          const hasCollapsedClass = Array.from(document.querySelectorAll('.performance-description'))
+            .some(d => d.classList.contains('collapsed'));
+          console.log('Step 2: Has collapsed class:', hasCollapsedClass);
+          
+          // Step 3: Verify no read more buttons
+          const hasReadMoreButtons = document.querySelectorAll('.read-more-btn').length > 0;
+          console.log('Step 3: Has read more buttons:', hasReadMoreButtons);
+          
+          // Step 4: Verify text lengths
+          const textLengths = Array.from(document.querySelectorAll('.performance-description'))
+            .map(d => d.textContent.length);
+          console.log('Step 4: Text lengths:', textLengths);
+    
+    implementation_examples:
+      description_display_fix:
+        description: "Surgical approach to fix performance description display issue"
+        problem: "Descriptions were present in the database but not displaying properly due to collapsed state"
+        approach: |
+          1. Identify the exact files that need modification:
+             - ui-controller.js: Contains the template that renders descriptions with collapsed state
+             - company-page.css: Contains styling for the collapsed descriptions
+          
+          2. Make targeted changes to each file:
+             - In ui-controller.js: Remove the .collapsed class and "Read More" button from the template
+             - In company-page.css: Remove any height/overflow constraints on descriptions
+          
+          3. Use a memory-efficient implementation process:
+             - Read one file at a time
+             - Extract only the target section
+             - Make minimal changes
+             - Write back only the modified section
+             - Verify before proceeding to next file
+        
+        code_changes:
+          ui_controller_template: |
+            // FROM:
+            <div class="performance-description collapsed">
+                <p>${performance.description.slice(0, 500)}${performance.description.length > 500 ? '...' : ''}</p>
+            </div>
+            <button class="read-more-btn">Read More</button>
+            
+            // TO:
+            <div class="performance-description">
+                <p>${performance.description}</p>
+            </div>
+    
+    code_patterns:
+      lazy_loading:
+        example: |
+          // Instead of:
+          const allData = await fetchAllData();
+          
+          // Use:
+          const pageData = await fetchPageData(currentPage);
+      
+      chunked_processing:
+        example: |
+          // Instead of:
+          allItems.forEach(processItem);
+          
+          // Use:
+          for (let i = 0; i < allItems.length; i += CHUNK_SIZE) {
+            const chunk = allItems.slice(i, i + CHUNK_SIZE);
+            processChunk(chunk);
+          }
+      
+      event_delegation:
+        example: |
+          // Instead of:
+          images.forEach(img => img.addEventListener('error', handleError));
+          
+          // Use:
+          container.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IMG') handleError(e);
+          }, true);

@@ -7,7 +7,7 @@
 
 const DataService = (() => {
     // API configuration
-    const API_BASE_URL = 'http://localhost:5000/api'; // Using absolute URL for the API
+    const API_BASE_URL = 'http://localhost:8000/api'; // Updated port for the API
     
     /**
      * Fetches company information
@@ -16,7 +16,7 @@ const DataService = (() => {
      */
     const getCompanyInfo = async (companyId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/companies/${companyId}`);
+            const response = await fetch(`${API_BASE_URL}/companies/paris-opera-ballet`);
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch company info: ${response.status} ${response.statusText}`);
@@ -39,43 +39,41 @@ const DataService = (() => {
      * @returns {Promise} - Resolves with performances data
      */
     const getCompanyPerformances = async (companyId) => {
+        console.log(`Fetching performances for company ${companyId}...`);
+        
         try {
-            console.log(`Fetching performances for company ${companyId}...`);
-            
-            // For Boston Ballet, only fetch current and upcoming performances
-            const queryParams = companyId === 'boston' ? '?past=false' : '';
-            const response = await fetch(`${API_BASE_URL}/companies/${companyId}/performances${queryParams}`);
+            const response = await fetch(`${API_BASE_URL}/companies/${companyId}/performances`);
             
             if (!response.ok) {
                 throw new Error(`Failed to fetch performances: ${response.status} ${response.statusText}`);
             }
             
-            const data = await response.json();
-            console.log(`Successfully fetched ${data.length} performances for company ${companyId}`);
+            const performances = await response.json();
             
-            // If no performances were found, fall back to mock data
-            if (data.length === 0) {
-                console.warn(`No performances found for ${companyId}, falling back to mock data`);
-                const mockPerformances = MockData.getCompanyPerformances(companyId);
-                console.log(`Found ${mockPerformances.length} mock performances for ${companyId}`);
-                return mockPerformances;
-            }
+            console.log('API Response:', performances);
             
-            return data;
+            // Process the performances to ensure all required fields are present
+            const processedPerformances = performances.map(performance => ({
+                id: performance.id || performance.url,
+                title: performance.title || 'Untitled Performance',
+                description: performance.description || 'No description available',
+                image: performance.thumbnail || performance.image || 'placeholder.jpg',
+                startDate: performance.startDate || '',
+                endDate: performance.endDate || '',
+                venue: performance.venue || '',
+                videoUrl: performance.videoUrl || '',
+                isCurrent: performance.isCurrent || false,
+                isNext: performance.isNext || false
+            }));
+            
+            console.log('Processed Performances:', processedPerformances);
+            return processedPerformances;
         } catch (error) {
             console.error(`Error fetching performances for company ${companyId}:`, error);
+            console.warn('Falling back to mock data');
             
-            // Special handling for NBC - don't use mock data
-            if (companyId === 'nbc') {
-                console.warn('Not using mock data for NBC - returning empty array');
-                return []; // Return empty array instead of mock data
-            }
-            
-            // For other companies, fall back to mock data as before
-            console.warn(`Falling back to mock data for ${companyId}`);
-            const mockPerformances = MockData.getCompanyPerformances(companyId);
-            console.log(`Found ${mockPerformances.length} mock performances for ${companyId}`);
-            return mockPerformances;
+            // Fallback to mock data
+            return getMockPerformances(companyId);
         }
     };
     

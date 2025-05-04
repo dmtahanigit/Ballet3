@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Description Display Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1 {
+            color: #007bff;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        .console {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+        }
+        
+        .console-output {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        .button-container {
+            margin: 20px 0;
+        }
+        
+        .button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .button:hover {
+            background-color: #0069d9;
+        }
+        
+        .button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Description Display Verification</h1>
+    
+    <div class="instructions">
+        <h2>Instructions</h2>
+        <div class="step">
+            <span class="step-number">1</span>
+            <span>Make sure the API server is running on <code>http://localhost:8000</code></span>
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            <span>Open the Paris Opera Ballet HTML file in another tab</span>
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            <span>Click the "Load Verification Runner" button below</span>
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            <span>Go to the Paris Opera Ballet tab and click the "Run Verification Scripts" button that appears in the top-right corner</span>
+        </div>
+        <div class="step">
+            <span class="step-number">5</span>
+            <span>Check the browser console for detailed verification results</span>
+        </div>
+    </div>
+    
+    <div class="button-container">
+        <button id="loadButton" class="button">Load Verification Runner</button>
+        <button id="openHtmlButton" class="button">Open Paris Opera Ballet HTML</button>
+    </div>
+    
+    <div id="statusContainer" class="status hidden"></div>
+    
+    <div class="console">
+        <pre id="consoleOutput" class="console-output">Console output will appear here...</pre>
+    </div>
+    
+    <script>
+        // Function to log to the console element
+        function log(message) {
+            const consoleOutput = document.getElementById('consoleOutput');
+            consoleOutput.textContent += message + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        // Function to show status message
+        function showStatus(message, type) {
+            const statusContainer = document.getElementById('statusContainer');
+            statusContainer.textContent = message;
+            statusContainer.className = `status ${type}`;
+            statusContainer.classList.remove('hidden');
+        }
+        
+        // Function to load the verification runner script
+        document.getElementById('loadButton').addEventListener('click', function() {
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            
+            log('Loading verification runner script...');
+            
+            // Create script element
+            const script = document.createElement('script');
+            script.src = 'run-verification.js';
+            
+            // Handle load success
+            script.onload = function() {
+                log('Verification runner script loaded successfully.');
+                log('Please go to the Paris Opera Ballet tab and click the "Run Verification Scripts" button in the top-right corner.');
+                
+                button.textContent = 'Verification Runner Loaded';
+                showStatus('Verification runner loaded successfully. Please go to the Paris Opera Ballet tab.', 'success');
+            };
+            
+            // Handle load error
+            script.onerror = function() {
+                log('Error loading verification runner script.');
+                
+                button.disabled = false;
+                button.textContent = 'Load Verification Runner';
+                showStatus('Error loading verification runner script. Please try again.', 'error');
+            };
+            
+            // Add script to document
+            document.head.appendChild(script);
+        });
+        
+        // Function to open the Paris Opera Ballet HTML file
+        document.getElementById('openHtmlButton').addEventListener('click', function() {
+            log('Opening Paris Opera Ballet HTML file...');
+            window.open('Paris Opera Ballet - World Ballets.html', '_blank');
+        });
+        
+        // Initial log
+        log('Verification page loaded. Click "Load Verification Runner" to begin.');
+    </script>
+</body>
+</html>
