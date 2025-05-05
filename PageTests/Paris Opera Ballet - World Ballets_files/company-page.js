@@ -65,8 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Sort performances by date
             performances.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
             
-            // Mark current and next performances
+            // Mark current and next performances, and explicitly check for past performances
             performances.forEach((performance, index) => {
+                // Check if performance is in the past (end date before current date)
+                const endDate = new Date(performance.endDate);
+                performance.isPast = endDate < currentDate;
+                
                 // Check if performance is current (happening now or within 30 days)
                 performance.isCurrent = DataService.isCurrentPerformance(performance);
                 
@@ -76,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Performance: ${performance.title}, Start: ${performance.startDate}, End: ${performance.endDate}, isPast: ${performance.isPast}, isCurrent: ${performance.isCurrent}`);
             });
             
-            // Render current and upcoming performances
+            // Render current and upcoming performances (not in the past)
             const currentPerformances = performances.filter(p => !p.isPast);
             console.log(`Found ${currentPerformances.length} current/upcoming performances`);
             UIController.renderCompanyPerformances(currentPerformances, 'currentPerformances');

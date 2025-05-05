@@ -151,6 +151,12 @@ const DataService = (() => {
         const startDate = new Date(performance.startDate);
         const endDate = new Date(performance.endDate);
         
+        // First check that the end date is not in the past
+        if (endDate < currentDate) {
+            return false;
+        }
+        
+        // Then check if it's currently running or starting within 30 days
         return (currentDate >= startDate && currentDate <= endDate) || 
                (startDate > currentDate && startDate <= new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000));
     };
@@ -164,8 +170,12 @@ const DataService = (() => {
     const isNextPerformance = (performances, performance) => {
         const currentDate = new Date();
         
-        // Find the first performance that hasn't started yet
-        const upcomingPerformances = performances.filter(p => new Date(p.startDate) > currentDate);
+        // Find the first performance that hasn't started yet and hasn't ended
+        const upcomingPerformances = performances.filter(p => {
+            const startDate = new Date(p.startDate);
+            const endDate = new Date(p.endDate);
+            return startDate > currentDate && endDate >= currentDate;
+        });
         
         if (upcomingPerformances.length > 0) {
             return performance.id === upcomingPerformances[0].id;

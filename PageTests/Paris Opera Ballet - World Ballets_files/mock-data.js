@@ -118,7 +118,8 @@ const MockData = (() => {
                     videoUrl: "",
                     venue: "Opéra Palais Garnier",
                     isCurrent: false,
-                    isNext: false
+                    isNext: false,
+                    isPast: true
                 }
             ],
             rb: [
