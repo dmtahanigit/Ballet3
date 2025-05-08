@@ -48,6 +48,14 @@
   - Updated the HTML to ensure proper sizing of the logo
   - Verified that the changes display the logo with its original colors
 
+- Paris Opera Ballet logo flickering on GitHub Pages fixed:
+  - Added a preload link for the logo image in the HTML head
+  - Removed CSS animations that were causing flickering
+  - Disabled the loading state CSS that was causing visual glitches
+  - Added proper image loading event handlers in JavaScript
+  - Implemented a forced reload with timeout to ensure proper loading
+  - Added explicit opacity and visibility styles to the logo image
+
 ## Next Development Phase
 - Verify the thumbnail rendering fix is working correctly:
   - Use the verification.html page to run all verification scripts
