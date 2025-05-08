@@ -54,6 +54,7 @@
 .past-performances {
     padding: var(--spacing-xl) var(--spacing-md);
     background-color: var(--color-white);
+    overflow: visible; /* Ensure content doesn't get cut off */
 }
 
 .current-performances h2,
@@ -65,6 +66,9 @@
 .performance-container {
     max-width: 1200px;
     margin: 0 auto;
+    overflow: visible; /* Ensure content is not cut off */
+    display: flex;
+    flex-direction: column; /* Stack items vertically by default */
 }
 
 .performance-item {
@@ -73,11 +77,12 @@
     margin-bottom: var(--spacing-xl);
     background-color: var(--color-white);
     border-radius: var(--border-radius);
-    overflow: hidden;
+    overflow: visible; /* Changed from hidden to visible */
     box-shadow: var(--box-shadow);
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
+    width: 100%; /* Ensure full width */
 }
 
 .performance-item.visible {
@@ -355,5 +360,52 @@
     
     .performance-image {
         height: 200px;
+    }
+    
+    /* Additional mobile fixes */
+    .performance-item {
+        margin-bottom: 30px;
+        display: block; /* Ensure proper display on mobile */
+    }
+    
+    .performance-content {
+        flex-direction: column !important; /* Force column layout on mobile */
+    }
+    
+    .performance-media, 
+    .performance-details {
+        width: 100% !important; /* Force full width on mobile */
+    }
+    
+    /* Ensure descriptions are visible */
+    .performance-description {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
+
+/* Add a refresh button for mobile users */
+.mobile-refresh-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--color-secondary);
+    color: white;
+    display: none; /* Hidden by default, shown via JS on mobile */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 100;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 767px) {
+    .mobile-refresh-btn {
+        display: flex;
     }
 }

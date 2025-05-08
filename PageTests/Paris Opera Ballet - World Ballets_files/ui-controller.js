@@ -9,12 +9,92 @@ const UIController = (() => {
     const DOM = {};
     
     /**
-     * Initializes the UI controller
+     * Validates an image URL and returns either the valid URL or a fallback
+     * @param {string} url - The image URL to validate
+     * @returns {string} - A valid image URL or fallback path
      */
-    const init = () => {
-        // Initialize any UI components that need setup
-        initObservers();
+    const validateImageUrl = (url) => {
+        // Check if URL is undefined, null, or empty
+        if (!url) {
+            console.warn('Image URL is missing, using placeholder');
+            return '../images/placeholder-performance.jpg';
+        }
+        
+        // Check if URL is a valid format
+        try {
+            // Check if it's a relative path starting with ../
+            if (url.startsWith('../') || url.startsWith('./')) {
+                return url;
+            }
+            
+            // Check if it's a data URL
+            if (url.startsWith('data:')) {
+                return url;
+            }
+            
+            // For absolute URLs, validate format
+            new URL(url);
+            
+            // Log successful validation
+            console.log('Image URL validated:', url);
+            return url;
+        } catch (e) {
+            // If URL is invalid, log error and return fallback
+            console.error('Invalid image URL:', url, e.message);
+            return '../images/placeholder-performance.jpg';
+        }
     };
+    
+/**
+ * Initializes the UI controller
+ */
+const init = () => {
+    // Initialize any UI components that need setup
+    initObservers();
+    
+    // Add mobile refresh button
+    addMobileRefreshButton();
+};
+
+/**
+ * Adds a refresh button for mobile users
+ */
+const addMobileRefreshButton = () => {
+    // Create refresh button element
+    const refreshBtn = document.createElement('button');
+    refreshBtn.className = 'mobile-refresh-btn';
+    refreshBtn.innerHTML = '↻';
+    refreshBtn.setAttribute('aria-label', 'Refresh data');
+    
+    // Add click event to refresh data
+    refreshBtn.addEventListener('click', () => {
+        // Show loading indicator
+        const loadingToast = document.createElement('div');
+        loadingToast.style.position = 'fixed';
+        loadingToast.style.top = '20px';
+        loadingToast.style.left = '50%';
+        loadingToast.style.transform = 'translateX(-50%)';
+        loadingToast.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        loadingToast.style.color = 'white';
+        loadingToast.style.padding = '10px 20px';
+        loadingToast.style.borderRadius = '5px';
+        loadingToast.style.zIndex = '1000';
+        loadingToast.textContent = 'Refreshing data...';
+        document.body.appendChild(loadingToast);
+        
+        // Clear localStorage cache
+        localStorage.removeItem('ballet_data_cache');
+        localStorage.removeItem('ballet_cache_timestamp');
+        
+        // Reload the page after a short delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    });
+    
+    // Add to document
+    document.body.appendChild(refreshBtn);
+};
     
     /**
      * Initializes intersection observers for scroll animations
@@ -57,7 +137,7 @@ const UIController = (() => {
             const slideElement = document.createElement('div');
             slideElement.className = 'banner-slide';
             slideElement.innerHTML = `
-                <img src="${slide.image}" alt="${slide.title}">
+                <img src="${validateImageUrl(slide.image)}" alt="${slide.title}" onerror="console.error('Failed to load banner image:', this.src); this.onerror=null; this.src='../images/placeholder-performance.jpg';">
                 <div class="banner-slide-content">
                     <h3>${slide.title}</h3>
                     <p>${slide.companyName}</p>
@@ -140,7 +220,7 @@ const UIController = (() => {
             card.className = 'performance-card';
             card.innerHTML = `
                 <div class="performance-card-image">
-                    <img src="${performance.image}" alt="${performance.title}">
+                    <img src="${validateImageUrl(performance.image)}" alt="${performance.title}" onerror="console.error('Failed to load card image:', this.src); this.onerror=null; this.src='../images/placeholder-performance.jpg';">
                 </div>
                 <div class="performance-card-content">
                     <h3>${performance.title}</h3>
@@ -253,7 +333,12 @@ const UIController = (() => {
                 </div>
                 <div class="performance-content">
                     <div class="performance-media">
-                        <img src="${performance.image}" alt="${performance.title}" class="performance-image" loading="lazy" onerror="console.error('Failed to load image:', this.src); this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'400\' viewBox=\'0 0 800 400\'><rect width=\'800\' height=\'400\' fill=\'%23cccccc\'/><text x=\'400\' y=\'200\' font-family=\'Arial\' font-size=\'32\' fill=\'%23666666\' text-anchor=\'middle\' dominant-baseline=\'middle\'>Paris Ballet Performance</text></svg>';">
+                        <img 
+                            src="${validateImageUrl(performance.image)}" 
+                            alt="${performance.title}" 
+                            class="performance-image" 
+                            loading="lazy" 
+                            onerror="console.error('Failed to load image:', this.src); this.onerror=null; this.src='../images/placeholder-performance.jpg';">
                         ${performance.videoUrl ? '<button class="performance-video-btn" aria-label="Play video">▶</button>' : ''}
                     </div>
                     <div class="performance-details">
