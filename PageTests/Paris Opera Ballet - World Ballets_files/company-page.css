@@ -24,38 +24,8 @@
     /* Removed border-radius, padding, and box-shadow to preserve original logo appearance */
 }
 
-/* Loading state for logo container */
-.company-logo-container.loading::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    z-index: 1;
-}
-
-.company-logo-container.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 30px;
-    height: 30px;
-    margin: -15px 0 0 -15px;
-    border: 3px solid var(--color-light-gray);
-    border-top-color: var(--color-secondary);
-    border-radius: 50%;
-    z-index: 2;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+/* Loading state for logo container - disabled to prevent flickering */
+/* We're now handling loading state via JavaScript instead of CSS animations */
 
 .company-logo-img {
     max-width: 100%;

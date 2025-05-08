@@ -18,23 +18,54 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update page title
             document.title = `${company.name} - World Ballets`;
             
-            // Update company logo
+            // Handle logo loading with specific event handlers to prevent flickering
+            const logoContainer = document.querySelector('.company-logo-container');
             const logoImg = document.querySelector('.company-logo-img');
+            
             if (logoImg) {
-                // Set up error handler before setting src
-                logoImg.onerror = () => {
-                    console.warn(`Failed to load logo for ${company.name}, using fallback`);
-                    logoImg.src = '../images/placeholder-logo.svg';
-                };
-                logoImg.src = company.logo;
+                // Remove any loading class that might cause animation/flickering
+                if (logoContainer) {
+                    logoContainer.classList.remove('loading');
+                }
+                
+                // Update the alt text
                 logoImg.alt = `${company.name} Logo`;
+                
+                // Add specific load event handler for the logo
+                logoImg.onload = function() {
+                    console.log('Logo image loaded successfully');
+                    // Ensure the container doesn't have loading class
+                    if (logoContainer) {
+                        logoContainer.classList.remove('loading');
+                    }
+                    // Make sure the image is visible with proper styling
+                    logoImg.style.opacity = '1';
+                    logoImg.style.visibility = 'visible';
+                };
+                
+                // Add specific error handler for the logo
+                logoImg.onerror = function() {
+                    console.error('Logo image failed to load:', logoImg.src);
+                    // Still remove loading class to prevent animation
+                    if (logoContainer) {
+                        logoContainer.classList.remove('loading');
+                    }
+                };
+                
+                // Force a reload of the image to ensure proper loading
+                const currentSrc = logoImg.src;
+                logoImg.src = '';
+                setTimeout(() => {
+                    logoImg.src = currentSrc;
+                }, 50);
             }
             
             // Add global image error handler for debugging
             document.addEventListener('error', function(e) {
                 if (e.target.tagName.toLowerCase() === 'img') {
                     console.error('Image loading error:', e.target.src);
-                    console.log('Image element:', e.target);
+                    // Don't log the element to avoid circular references
+                    console.log('Image error event:', e.type);
                 }
             }, true);
             
