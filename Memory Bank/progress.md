@@ -65,6 +65,14 @@
   - Modified all data fetching functions to check cache before API requests
   - Ensured GitHub Pages version can persist MongoDB data until explicitly refreshed
 
+- Mobile display issues fixed:
+  - Resolved issue where only one performance was visible on mobile devices
+  - Added explicit overflow handling for performance containers
+  - Improved mobile-specific CSS with forced column layout and full width
+  - Added a dedicated mobile refresh button for easy cache clearing
+  - Ensured all performance items are properly displayed on small screens
+  - Fixed stacking and layout issues in mobile view
+
 ## Next Development Phase
 - Verify the thumbnail rendering fix is working correctly:
   - Use the verification.html page to run all verification scripts
