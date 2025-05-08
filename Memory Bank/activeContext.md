@@ -52,6 +52,14 @@
   - Implementing a forced reload with timeout to ensure proper loading
   - Adding explicit opacity and visibility styles to the logo image
 
+- Implemented localStorage caching for API data to ensure persistence between visits:
+  - Added client-side caching using localStorage to store API responses
+  - Implemented cache versioning and expiration mechanism (30-day default)
+  - Added Shift+Ctrl+R keyboard shortcut to manually refresh data
+  - Modified all data fetching functions to check cache before making API requests
+  - Added visual indicator for data refresh operations
+  - Ensured GitHub Pages version can persist MongoDB data until explicitly refreshed
+
 ## Next Steps
 - Verify the thumbnail rendering fix is working correctly
 - Monitor scraping success rate
