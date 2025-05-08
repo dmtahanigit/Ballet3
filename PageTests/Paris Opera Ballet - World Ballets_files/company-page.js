@@ -12,6 +12,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set company ID for Paris Opera Ballet
     const companyId = 'paris-opera-ballet';
     
+    // Add keyboard shortcut for data refresh (Shift+Ctrl+R)
+    document.addEventListener('keydown', (e) => {
+        if (e.shiftKey && e.ctrlKey && e.key === 'R') {
+            e.preventDefault();
+            console.log('Refreshing data...');
+            
+            // Show a loading indicator
+            const indicator = document.createElement('div');
+            indicator.textContent = 'Refreshing data...';
+            indicator.style.position = 'fixed';
+            indicator.style.top = '10px';
+            indicator.style.right = '10px';
+            indicator.style.padding = '10px';
+            indicator.style.background = 'rgba(0,0,0,0.7)';
+            indicator.style.color = 'white';
+            indicator.style.borderRadius = '5px';
+            indicator.style.zIndex = '9999';
+            document.body.appendChild(indicator);
+            
+            // Refresh the data
+            DataService.refreshAllData(companyId)
+                .then(() => {
+                    // Update indicator
+                    indicator.textContent = 'Data refreshed successfully!';
+                    setTimeout(() => {
+                        // Reload the page to show fresh data
+                        window.location.reload();
+                    }, 1000);
+                })
+                .catch(err => {
+                    console.error('Error refreshing data:', err);
+                    indicator.textContent = 'Error refreshing data';
+                    setTimeout(() => {
+                        document.body.removeChild(indicator);
+                    }, 3000);
+                });
+        }
+    });
+    
     // Load company information
     DataService.getCompanyInfo(companyId)
         .then(company => {
