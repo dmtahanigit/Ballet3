@@ -1,0 +1,7 @@
+This directory contains placeholder references for images.
+
+In a production environment, this directory would contain:
+1. Company logos for each ballet company
+2. Performance images for each ballet performance
+
+For demonstration purposes, our JavaScript code will handle missing images gracefully.

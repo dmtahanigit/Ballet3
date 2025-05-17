@@ -1,0 +1,376 @@
+/**
+ * Ballet World - Home Page Styles
+ */
+
+/* Hero Section */
+.hero {
+    background-color: #f8f9fa;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://placehold.co/1200x600?text=Ballet+Hero');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    text-align: center;
+    padding: 5rem 1rem;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Featured Performances Section */
+.featured-performances {
+    margin-bottom: 3rem;
+}
+
+.featured-performances h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.featured-performances h2::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #007bff;
+    margin: 0.5rem auto 0;
+}
+
+.performances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Performance Card */
+.performance-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+}
+
+.performance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.performance-image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.performance-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.performance-card:hover .performance-image img {
+    transform: scale(1.05);
+}
+
+.performance-details {
+    padding: 1.25rem;
+}
+
+.performance-title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.performance-company {
+    margin-bottom: 0.5rem;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.performance-date {
+    margin-bottom: 0.5rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.performance-venue {
+    margin-bottom: 0.75rem;
+    color: #666;
+    font-style: italic;
+}
+
+.badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.badge-current {
+    background-color: #28a745;
+}
+
+.badge-next {
+    background-color: #007bff;
+}
+
+/* Featured Companies Section */
+.featured-companies {
+    margin-bottom: 3rem;
+}
+
+.featured-companies h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.featured-companies h2::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #007bff;
+    margin: 0.5rem auto 0;
+}
+
+.companies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Company Card */
+.company-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.company-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.company-logo {
+    height: 150px;
+    width: 150px;
+    margin: 2rem auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.company-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.company-info {
+    padding: 1.25rem;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.company-name {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.company-location {
+    margin-bottom: 1rem;
+    color: #666;
+    font-style: italic;
+}
+
+.company-description {
+    margin-bottom: 1.5rem;
+    color: #555;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+/* About Section */
+.about-section {
+    background-color: #f8f9fa;
+    padding: 3rem 0;
+    margin-bottom: 0;
+}
+
+.about-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.about-section h2::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: #007bff;
+    margin: 0.5rem auto 0;
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-text p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.about-image {
+    flex: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Footer Styles */
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 1.5rem;
+}
+
+.footer-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.25rem;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+    color: #666;
+    text-decoration: none;
+}
+
+.footer-section a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.footer-bottom {
+    padding-top: 1.5rem;
+    border-top: 1px solid #eaeaea;
+    text-align: center;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .about-content {
+        flex-direction: column;
+    }
+    
+    .about-image {
+        order: -1;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 3rem 1rem;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .performances-grid,
+    .companies-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,358 +1,115 @@
-processes:
-  test_generation:
-    patterns:
-      - "*test*"
-    prompt: "For which folder?"
-    
-    folder_patterns:
-      - "*test*{folder}"
-    
-    steps:
-      1:
-        name: "Verify folder exists and contains service.yml"
-        action: "ls {folder}"
-        checkpoint: true
-        validate: "Check if service.yml exists"
-        on_error: "The specified folder '{folder}' does not contain a kong service configuration. Quit test generation process."
+# Ballet World Project Rules and Patterns
 
-      2:
-        name: "Check for optional params.yml file"
-        action: "ls {folder}"
-        checkpoint: false
-        validate: "Check if params.yml exists, if it doesn't send a notice to the user that no parameters file was found. Let them know they have the option to include one for more advanced testing."
+## Project Structure
 
-      3:
-        name: "Write initial tests with response logging"
-        action: |
-          Generate a Vitest testing file based on the provided Kong declarative config and service details. Your output should be a JavaScript file that contains a series of test requests with response logging.
+- The project follows a modular structure with separate directories for each ballet company scraper
+- Common utilities are in `scrapers/common/` directory
+- API server is in the `api/` directory
+- Tests are in `tests/` directories within each component
+- Main entry point is `run.py`
 
-          Objective:
-          Create a diverse set of API requests with basic status assertions and detailed response logging to analyze the actual responses.
+## Naming Conventions
 
-          Output Structure:
-          Each test should:
-          1. Make the request
-          2. Log the response details:
-             ```javascript
-             console.log(`\n=== ${testName} ===`);
-             console.log('Headers:', JSON.stringify(response.headers, null, 2));
-             console.log('Body:', JSON.stringify(response.data, null, 2));
-             ```
-          3. Assert the status code
+- Python files: snake_case (e.g., `bolshoi_scraper.py`)
+- Classes: PascalCase (e.g., `PerformanceScraper`)
+- Functions and variables: snake_case (e.g., `scrape_performances`)
+- Constants: UPPER_SNAKE_CASE (e.g., `BASE_URL`)
+- MongoDB collections: snake_case (e.g., `paris_opera_ballet`)
 
-          Request Configuration:
-          Each request object should contain:
-          - hostname: http://localhost:8000
-          - name: A descriptive name explaining the purpose of the request
-          - method: The HTTP method (GET, POST, PUT, DELETE, etc.)
-          - uri: The full URI path, including the leading slash
-          - headers: An object containing important, non-common headers
-          - body: The request body (if applicable, e.g., for POST requests)
-          - query_params: An object containing query parameters (if applicable)
+## Code Style
 
-          Guidelines:
-          1. Vary methods, URI paths, headers, and parameters across requests.
-          2. Include a wide range of error scenarios:
-             - Invalid paths
-             - Missing required parameters
-             - Invalid input types
-             - Out-of-range values
-             - Unauthorized access attempts
-          3. Include parameters found in params.yml as a global variable that can be used within tests.
-          4. When creating invalid inputs:
-             - Change more than one character from the valid value
-             - Use special characters, wildcards, or regex patterns for parameters defined in the Kong service config
-             - Try unusual symbols or extremely long strings to test for potential crashes
-          5. Generate requests that test:
-             - Edge cases (e.g., minimum/maximum values)
-             - Different data types (strings, numbers, booleans, arrays, objects)
-             - Empty or null values
-             - Case sensitivity
-          6. Include security-focused tests:
-             - SQL injection attempts
-             - Cross-site scripting (XSS) payloads
-             - Large payloads to test for buffer overflows
-             - Malformed JSON or XML in the body
-          7. Do not include the ~ for kong routes, the tilde just enforces that the uri must start with the specified string rather than being a wildcard in front of the string.
-        checkpoint: true
-        output: "{folder}/{folder}.test.js"
-      
-      4:
-        name: "Run initial tests"
-        action: |
-          Run the tests generated in the previous step using Vitest. 
-          The console output will show the response headers and bodies for each test.
-          Review the output to identify important headers and response body fields for assertions.
-        checkpoint: true
-        on_error: "Check if there are errors like ECONNREFUSED which means the server cannot be connected to. If you find those then just tell the user to check connectivity and quit the process. Otherwise, try and fix the tests"
+- Follow PEP 8 guidelines for Python code
+- Use 4 spaces for indentation in Python files
+- Maximum line length is 100 characters
+- Use docstrings for all modules, classes, and functions
+- Include type hints where appropriate
 
-      5:
-        name: "Add comprehensive assertions"
-        action: |
-          Based on the test run output from step 4, update the test file to include assertions for headers and response bodies.
+## Data Structure
 
-          Updates to make:
-          1. Comment out the console.log statements (keep them for future debugging)
-          2. Add header assertions for each test:
-             - Common headers (e.g., content-type, x-kong-proxy-latency)
-             - Kong-specific headers
-             - Custom headers specific to the endpoint
-          3. Add response body assertions:
-             - Verify response structure (object vs array)
-             - Check for required fields
-             - Validate data types of important fields
-             - Assert specific values where applicable
-          4. Add performance assertions:
-             - Response time expectations
-             - Latency thresholds
+- Performance data should follow this structure:
+  ```python
+  {
+      'title': 'Swan Lake',
+      'composer': 'Pyotr Tchaikovsky',
+      'date': 'December 10-15, 2025',
+      'venue': 'Bolshoi Theatre',
+      'description': 'A beautiful ballet...',
+      'url': 'https://www.bolshoi.ru/en/performances/swan-lake',
+      'company': 'Bolshoi Ballet',
+      'details_scraped': True,
+      'last_updated': '2025-05-17 15:00:00'
+  }
+  ```
+- Ensure consistent field names across all scrapers
+- Use ISO format for dates where possible
+- Include company name in all performance records
 
-          Example assertions:
-          ```javascript
-          // Header assertions
-          expect(response.headers['content-type']).toMatch(/application\/json/);
-          expect(response.headers).toHaveProperty('x-kong-proxy-latency');
-          
-          // Body assertions
-          expect(response.data).toHaveProperty('key');
-          expect(typeof response.data.key).toBe('string');
-          
-          // Performance assertions
-          expect(parseInt(response.headers['x-kong-proxy-latency'])).toBeLessThan(1000);
-          ```
-        checkpoint: true
-        output: "{folder}/{folder}.test.js"
+## Error Handling
 
-      6:
-        name: "Verify enhanced tests"
-        action: |
-          Run the enhanced tests to verify all new assertions pass.
-          If any assertions fail:
-          1. Review the actual values vs expected values
-          2. Adjust assertions based on actual service behavior
-          3. Re-run tests to confirm fixes
-        checkpoint: true
-        on_error: "Review failed assertions and adjust expectations based on actual service behavior"
+- Use try-except blocks for operations that might fail
+- Log errors with appropriate level (INFO, WARNING, ERROR)
+- Include context in error messages
+- Implement fallbacks for missing data
 
-      6:
-        name: "Remove "
-        action: |
-          Run the enhanced tests to verify all new assertions pass.
-          If any assertions fail:
-          1. Review the actual values vs expected values
-          2. Adjust assertions based on actual service behavior
-          3. Re-run tests to confirm fixes
-        checkpoint: true
-        on_error: "Review failed assertions and adjust expectations based on actual service behavior"
+## Testing
 
-    variables:
-      folder:
-        type: "string"
-        required: true
-        description: "Target folder for test generation"
+- Write unit tests for all components
+- Use mocking for external dependencies
+- Follow AAA pattern (Arrange, Act, Assert)
+- Test both success and failure cases
 
-# Ballet Scraper Project Intelligence
-ballet_scraper:
-  context_window_optimization:
-    description: "Strategies to avoid context window errors when debugging frontend issues"
-    patterns:
-      - When debugging frontend issues, especially the thumbnail rendering problem, we encounter context window errors that limit our ability to process large amounts of code or data at once
-      - These errors occur when trying to analyze multiple large files simultaneously or when processing large datasets
-      - The thumbnail rendering issue involves multiple components (database, API, frontend) which increases complexity
-    
-    strategies:
-      surgical_editing:
-        - Precision Targeting: Identify the exact lines of code that need modification
-        - Minimal Changes: Make only the necessary changes to fix the issue
-        - Sequential Processing: Handle one file at a time to minimize memory usage
-        - Verification Steps: Verify each change before proceeding to the next
-        
-      modular_approach:
-        - Targeted File Analysis: Only load specific files directly related to the issue
-        - Incremental Processing: Analyze one component at a time rather than loading the entire codebase
-        - Strategic Sampling: Examine representative samples of data rather than complete datasets
-      
-      efficient_debugging:
-        - Focused Debugging: Target specific functions rather than entire files
-        - Component Isolation: Extract and test problematic components independently
-        - Minimal Reproduction: Create minimal test cases that reproduce the issue
-      
-      implementation_techniques:
-        - Lazy Loading: Load resources only when needed
-        - Chunked Processing: Process data in manageable chunks
-        - Strategic Memoization: Cache results to avoid recomputation
-        - Event Delegation: Use event delegation for multiple similar elements
-    
-    testing_strategies:
-      automated_verification_scripts:
-        - Create lightweight JavaScript snippets that target only specific DOM elements
-        - Extract minimal verification data (e.g., presence/absence of classes, element counts)
-        - Output results in compact JSON format for easy analysis
-        example: |
-          // Verification script for description display
-          (() => {
-            // Target only what we need to check
-            const descriptions = document.querySelectorAll('.performance-description');
-            const readMoreButtons = document.querySelectorAll('.read-more-btn');
-            
-            // Capture only essential data
-            const results = {
-              descriptionCount: descriptions.length,
-              hasCollapsedClass: Array.from(descriptions).some(d => d.classList.contains('collapsed')),
-              readMoreButtonCount: readMoreButtons.length,
-              descriptionTextSamples: Array.from(descriptions).map(d => d.textContent.length)
-            };
-            
-            // Output minimal data to console
-            console.log(JSON.stringify(results));
-          })();
-      
-      diagnostic_api_endpoints:
-        - Add temporary endpoints to the API server for testing specific functionality
-        - Return only the minimal data needed for verification
-        - Avoid loading entire page content for testing
-        example: |
-          @app.route('/api/debug/description-test', methods=['GET'])
-          def debug_description():
-              """Lightweight endpoint that returns only description data for testing"""
-              try:
-                  sample = collection.find_one({}, {'_id': 0, 'description': 1})
-                  return jsonify({
-                      "description_sample": sample.get('description', ''),
-                      "description_length": len(sample.get('description', ''))
-                  })
-              except Exception as e:
-                  return jsonify({'error': str(e)}), 500
-      
-      dom_diffing:
-        - Capture and compare only relevant DOM structures before and after changes
-        - Focus on specific attributes (classes, text content) rather than entire elements
-        - Use functional approach to transform DOM into lightweight data structures
-        example: |
-          function captureDescriptionState() {
-            return Array.from(document.querySelectorAll('.performance-item')).map(item => {
-              const desc = item.querySelector('.performance-description');
-              return {
-                title: item.querySelector('.performance-title').textContent,
-                hasCollapsedClass: desc.classList.contains('collapsed'),
-                hasReadMoreBtn: !!item.querySelector('.read-more-btn'),
-                textLength: desc.textContent.length,
-                truncated: desc.textContent.includes('...')
-              };
-            });
-          }
-      
-      memory_optimized_browser_testing:
-        - Use headless browser testing with targeted extraction
-        - Create scripts that extract only verification data points
-        - Process results incrementally to avoid memory pressure
-        example: |
-          const puppeteer = require('puppeteer');
+## Logging
 
-          (async () => {
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
-            await page.goto('file://${PWD}/PageTests/Paris Opera Ballet - World Ballets.html');
-            
-            // Wait for content to load
-            await page.waitForSelector('.performance-description');
-            
-            // Extract only what we need to verify
-            const results = await page.evaluate(() => {
-              const descriptions = document.querySelectorAll('.performance-description');
-              return {
-                count: descriptions.length,
-                hasCollapsed: Array.from(descriptions).some(d => d.classList.contains('collapsed')),
-                hasReadMore: document.querySelectorAll('.read-more-btn').length > 0,
-                textLengths: Array.from(descriptions).map(d => d.textContent.length)
-              };
-            });
-            
-            console.log(JSON.stringify(results, null, 2));
-            await browser.close();
-          })();
-      
-      incremental_state_verification:
-        - Implement a state machine approach to testing
-        - Verify one aspect at a time (existence, classes, content)
-        - Build confidence incrementally without exceeding context limits
-        example: |
-          // Step 1: Verify descriptions exist
-          const descriptionsExist = document.querySelectorAll('.performance-description').length > 0;
-          console.log('Step 1: Descriptions exist:', descriptionsExist);
-          
-          // Step 2: Verify no collapsed class
-          const hasCollapsedClass = Array.from(document.querySelectorAll('.performance-description'))
-            .some(d => d.classList.contains('collapsed'));
-          console.log('Step 2: Has collapsed class:', hasCollapsedClass);
-          
-          // Step 3: Verify no read more buttons
-          const hasReadMoreButtons = document.querySelectorAll('.read-more-btn').length > 0;
-          console.log('Step 3: Has read more buttons:', hasReadMoreButtons);
-          
-          // Step 4: Verify text lengths
-          const textLengths = Array.from(document.querySelectorAll('.performance-description'))
-            .map(d => d.textContent.length);
-          console.log('Step 4: Text lengths:', textLengths);
-    
-    implementation_examples:
-      description_display_fix:
-        description: "Surgical approach to fix performance description display issue"
-        problem: "Descriptions were present in the database but not displaying properly due to collapsed state"
-        approach: |
-          1. Identify the exact files that need modification:
-             - ui-controller.js: Contains the template that renders descriptions with collapsed state
-             - company-page.css: Contains styling for the collapsed descriptions
-          
-          2. Make targeted changes to each file:
-             - In ui-controller.js: Remove the .collapsed class and "Read More" button from the template
-             - In company-page.css: Remove any height/overflow constraints on descriptions
-          
-          3. Use a memory-efficient implementation process:
-             - Read one file at a time
-             - Extract only the target section
-             - Make minimal changes
-             - Write back only the modified section
-             - Verify before proceeding to next file
-        
-        code_changes:
-          ui_controller_template: |
-            // FROM:
-            <div class="performance-description collapsed">
-                <p>${performance.description.slice(0, 500)}${performance.description.length > 500 ? '...' : ''}</p>
-            </div>
-            <button class="read-more-btn">Read More</button>
-            
-            // TO:
-            <div class="performance-description">
-                <p>${performance.description}</p>
-            </div>
-    
-    code_patterns:
-      lazy_loading:
-        example: |
-          // Instead of:
-          const allData = await fetchAllData();
-          
-          // Use:
-          const pageData = await fetchPageData(currentPage);
-      
-      chunked_processing:
-        example: |
-          // Instead of:
-          allItems.forEach(processItem);
-          
-          // Use:
-          for (let i = 0; i < allItems.length; i += CHUNK_SIZE) {
-            const chunk = allItems.slice(i, i + CHUNK_SIZE);
-            processChunk(chunk);
-          }
-      
-      event_delegation:
-        example: |
-          // Instead of:
-          images.forEach(img => img.addEventListener('error', handleError));
-          
-          // Use:
-          container.addEventListener('error', (e) => {
-            if (e.target.tagName === 'IMG') handleError(e);
-          }, true);
+- Use the Python logging module
+- Include timestamp, level, and message
+- Log at appropriate levels:
+  - DEBUG: Detailed debugging information
+  - INFO: Confirmation that things are working as expected
+  - WARNING: Something unexpected happened, but the application still works
+  - ERROR: The application has failed to perform some function
+  - CRITICAL: The application is unable to continue running
+
+## API Endpoints
+
+- Follow RESTful conventions
+- Use plural nouns for resources (e.g., `/api/performances`)
+- Include company ID in endpoints for company-specific resources (e.g., `/api/performances/{company_id}`)
+- Support pagination with `limit` and `skip` parameters
+- Return consistent JSON response structure
+
+## Database Operations
+
+- Use the common utilities in `scrapers/common/db.py` for database operations
+- Implement upsert operations to avoid duplicates
+- Include `last_updated` field in all records
+- Use appropriate indexes for frequently queried fields
+
+## Scraping Best Practices
+
+- Implement delays between requests to avoid overloading target websites
+- Use Selenium for JavaScript-heavy pages
+- Handle cookie consent dialogs
+- Implement robust selectors that can handle HTML structure changes
+- Clean HTML from extracted text
+- Provide fallback descriptions for performances without descriptions
+
+## Command Line Interface
+
+- Use argparse for command-line arguments
+- Provide help text for all arguments
+- Support common operations as subcommands
+- Return appropriate exit codes (0 for success, non-zero for failure)
+
+## Environment Variables
+
+- Store sensitive information in environment variables
+- Use python-dotenv to load environment variables from .env file
+- Provide default values for non-sensitive environment variables
+- Document all required environment variables
+
+## Documentation
+
+- Include README.md files in all directories
+- Document API endpoints with examples
+- Include setup instructions in the main README.md
+- Document how to add new ballet companies

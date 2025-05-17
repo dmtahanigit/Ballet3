@@ -30,6 +30,12 @@ const verificationScripts = [
     path: 'api-verification.js',
     resultKey: 'apiVerificationResults',
     description: 'Verifies that descriptions are present in the database'
+  },
+  {
+    name: 'Thumbnail Verification',
+    path: 'thumbnail-verification.js',
+    resultKey: null, // This script doesn't set a global result variable
+    description: 'Verifies that thumbnails are loading correctly without falling back to placeholders'
   }
 ];
 

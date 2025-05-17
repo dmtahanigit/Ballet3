@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Ballets - Discover Ballet Performances Worldwide</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/home-page.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/logo.svg" alt="World Ballets Logo">
+                    <span>World Ballets</span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="companies.html">Companies</a></li>
+                    <li><a href="performances.html">Performances</a></li>
+                    <li><a href="search.html">Search</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Discover the World of Ballet</h1>
+                <p>Explore performances from the world's leading ballet companies</p>
+                <div class="hero-buttons">
+                    <a href="companies.html" class="btn btn-primary">Browse Companies</a>
+                    <a href="search.html" class="btn btn-secondary">Search Performances</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-performances">
+            <div class="container">
+                <h2>Featured Performances</h2>
+                <div id="featured-performances-list" class="performances-grid">
+                    <div class="loading-indicator">Loading featured performances...</div>
+                    <!-- Performance cards will be inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-companies">
+            <div class="container">
+                <h2>Featured Companies</h2>
+                <div id="featured-companies-list" class="companies-grid">
+                    <div class="loading-indicator">Loading featured companies...</div>
+                    <!-- Company cards will be inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <div class="container">
+                <h2>About World Ballets</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>World Ballets is your gateway to the enchanting world of ballet. We provide up-to-date information on performances from the world's leading ballet companies, including the Paris Opera Ballet, Bolshoi Ballet, Royal Ballet, and more.</p>
+                        <p>Our mission is to make ballet more accessible to everyone by providing a comprehensive resource for ballet enthusiasts, newcomers, and travelers looking to experience the beauty of ballet around the world.</p>
+                        <p>Whether you're planning a trip to see a specific performance or simply exploring the rich history and artistry of ballet, World Ballets is your trusted companion.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="https://placehold.co/600x400?text=Ballet+World" alt="Ballet World">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>World Ballets</h3>
+                    <p>Your gateway to the world of ballet</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="companies.html">Companies</a></li>
+                        <li><a href="performances.html">Performances</a></li>
+                        <li><a href="search.html">Search</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Email: info@worldballets.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 World Ballets. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script src="js/ballet-data-service.js"></script>
+    <script src="js/ui-controllers/home-page.js"></script>
+</body>
+</html>

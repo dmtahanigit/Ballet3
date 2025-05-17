@@ -25,18 +25,7 @@ COLLECTION_NAME = os.getenv('COLLECTION_NAME')
 
 # List of ballet URLs to update
 BALLET_URLS = [
-    "https://www.operadeparis.fr/en/season-25-26/ballet/gala",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/balanchine-november-wheeldon",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/david-dawson-trisha-brown-m-van-opstal",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/paris-opera-ballet-school-demonstrations",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/notre-dame-de-paris",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/le-parc",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/marcos-morau-morgann-runace-jessica-wright",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/romeo-and-juliet",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/paris-opera-ballet-school-production",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/la-dame-aux-camelias",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/la-bayadere",
-    "https://www.operadeparis.fr/en/season-25-26/ballet/micaela-taylor-mats-ek-crystal-pite"
+    "https://www.operadeparis.fr/en/season-25-26/ballet/giselle"
 ]
 
 def setup_driver():

@@ -1,0 +1,190 @@
+/**
+ * Ballet World - Global Styles
+ */
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Header */
+.site-header {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.site-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 0.75rem;
+}
+
+.logo span {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+}
+
+.main-nav li {
+    margin-left: 1.5rem;
+}
+
+.main-nav a {
+    color: #333;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+.main-nav a:hover {
+    color: #007bff;
+}
+
+.main-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #007bff;
+    transition: width 0.3s ease;
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+}
+
+/* Footer */
+.site-footer {
+    background-color: #f8f9fa;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    border-top: 1px solid #eaeaea;
+    text-align: center;
+    color: #666;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Page Title */
+.page-title {
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eaeaea;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .site-header .container {
+        flex-direction: column;
+    }
+    
+    .logo {
+        margin-bottom: 1rem;
+    }
+    
+    .main-nav ul {
+        justify-content: center;
+    }
+    
+    .main-nav li:first-child {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .main-nav li {
+        margin: 0.5rem;
+    }
+}

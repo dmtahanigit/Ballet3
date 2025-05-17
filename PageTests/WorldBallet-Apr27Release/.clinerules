@@ -1,0 +1,205 @@
+# Cline Extension Architecture & Development Guide
+
+## Project Overview
+
+Cline is a VSCode extension that provides AI assistance through a combination of a core extension backend and a webview UI frontend.
+
+## Architecture Overview
+
+```mermaid
+graph TB
+    GlobalState[VSCode Global State]
+    SecretsStorage[VSCode Secrets Storage]
+    end
+
+    subgraph Webview UI
+        WebviewApp[React App<br/>webview-ui/src/App.tsx]
+        ExtStateContext[ExtensionStateContext<br/>webview-ui/src/context/ExtensionStateContext.tsx]
+        ReactComponents[React Components]
+    end
+
+    subgraph Storage
+        TaskStorage[Task Storage<br/>Per-Task Files & History]
+        CheckpointSystem[Git-based Checkpoints]
+    end
+```
+
+%% Core Extension Data Flow
+ExtensionEntry --> ClineProvider
+ClineProvider --> ClineClass
+ClineClass --> GlobalState
+ClineClass --> SecretsStorage
+ClineClass --> TaskStorage
+ClineClass --> CheckpointSystem
+
+%% Webview Data Flow
+WebviewApp --> ExtStateContext --> ReactComponents
+
+style GlobalState fill:#f9f,stroke:#333,stroke-width:2px
+style SecretsStorage fill:#f9f,stroke:#333,stroke-width:2px
+style ExtStateContext fill:#bbf,stroke:#333,stroke-width:2px
+style ClineProvider fill:#bfb,stroke:#333,stroke-width:2px
+
+## Definitions
+
+- core extension: Anything inside the src folder starting with the Cline.ts file
+- core extension state: Managed by the ClineProvider class in src/core/webview/ClineProvider.ts, which serves as the bridge between the core extension and webview
+- webview: Anything inside the webview-ui. All the react or view's seen by the user and user interaction components
+- webview state: Managed by ExtensionStateContext in webview-ui/src/context/ExtensionStateContext.tsx, which serves as the bridge between the webview and core extension
+
+### Core Extension State
+
+The `ClineProvider` class manages multiple types of persistent storage:
+
+- **Global State:** Stored across all VSCode instances. Used for settings and data that should persist globally.
+- **Workspace State:** Specific to the current workspace. Used for task-specific data and settings.
+- **Secrets:** Secure storage for sensitive information like API keys.
+
+The `ClineProvider` handles the distribution of state to both the core extension and webview components. It synchronizes with the core extension through VSCode's message passing system and provides type-safe access to state.
+
+## Core Extension (Cline.ts)
+
+The Cline class is the heart of the extension, managing task execution, state persistence, and tool coordination.
+
+### Task Execution Loop
+
+The core task execution loop follows this pattern:
+
+```typescript
+class Cline {
+  async initiateTaskLoop(userContent: UserContent, isNewTask: boolean) {
+    while (!this.abort) {
+      // 1. Make API request and stream response
+      const stream = this.attemptApiRequest()
+      
+      // 2. Parse and present content blocks
+      
+      // Present blocks to user
+      await this.presentAssistantMessage()
+      break
+    }
+  }
+  
+  // 3. Wait for tool execution to complete
+  await pWaitFor(() => this.userMessageContentReady)
+  
+  // 4. Continue loop with tool result
+  const recDidEndLoop = await this.recursivelyMakeClinetRequests(
+    this.userMessageContent
+  )
+}
+```
+
+### Message Streaming System
+
+The streaming system handles real-time updates and partial content:
+
+```typescript
+class Cline {
+  async presentAssistantMessage() {
+    this.presentAssistantMessageLocked = true
+    
+    // Present current content block
+    const block = this.assistantMessageContent[this.currentStreamingContentIndex]
+    
+    // Handle different types of content
+    switch (block.type) {
+      case "text":
+        await this.say("text", content, undefined, block.partial)
+        break
+      case "tool_use":
+        // Handle tool execution
+        break
+    }
+    
+    // Move to next block if complete
+    if (!block.partial) {
+      this.currentStreamingContentIndex++
+    }
+  }
+}
+```
+
+### Tool Execution Flow
+
+```typescript
+class Cline {
+  async executeTool(block) {
+    // 1. Check auto-approval settings
+    if (this.shouldAutoApproveTool(block.name)) {
+      await this.say("tool", message)
+      this.consecutiveAutoApprovedRequestsCount++
+    } else {
+      // 2. Request user approval
+      const didApprove = await askApproval("tool", message)
+      if (!didApprove) {
+        this.didRejectTool = true
+        return
+      }
+    }
+    
+    // 3. Execute tool
+    const result = await this.executeTool(block)
+    
+    // 4. Save checkpoint
+    await this.saveCheckpoint()
+    
+    // 5. Return result to API
+    return result
+  }
+}
+```
+
+### Error Handling
+
+```typescript
+class Cline {
+  async handleError(action: string, error: Error) {
+    // 1. Check if task was abandoned
+    if (this.abandoned) return
+    
+    // 2. Format error message
+    const errorString = `Error ${action}: ${error.message}`
+    
+    // 3. Present error to user
+    await this.say("error", errorString)
+    
+    // 4. Add error to tool results
+    pushToolResult(formatResponse.toolError(errorString))
+    
+    // 5. Cleanup resources
+    await this.diffViewProvider.revertChanges()
+    await this.browserSession.closeBrowser()
+  }
+}
+```
+
+### API Request & Token Management
+
+The Cline class handles API requests with built-in retry, streaming, and token management:
+
+// 2. Manage context window
+const previousRequest = this.clineMessages[previousApiReqIndex]
+if (previousRequest?.text) {
+  const { tokensIn, tokensOut } = JSON.parse(previousRequest.text)
+  const totalTokens = (tokensIn || 0) + (tokensOut || 0)
+  
+  // Truncate conversation if approaching context limit
+  if (totalTokens >= maxAllowedSize) {
+    this.conversationHistoryDeletedRange = getNextTruncationRange(
+      this.apiConversationHistory,
+      this.conversationHistoryDeletedRange,
+      totalTokens / 2 > maxAllowedSize ? "quarter" : "half"
+    )
+  }
+}
+
+// 3. Handle streaming with automatic retry
+try {
+  this.isWaitingForFirstChunk = true
+  const firstChunk = await iterator.next()
+  yield firstChunk.value
+  this.isWaitingForFirstChunk = false
+  
+  // Stream remaining chunks
+}

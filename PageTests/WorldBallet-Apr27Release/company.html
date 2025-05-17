@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company - World Ballets</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/company-page.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="images/logo.svg" alt="World Ballets Logo">
+                    <span>World Ballets</span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="companies.html">Companies</a></li>
+                    <li><a href="performances.html">Performances</a></li>
+                    <li><a href="search.html">Search</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        
+        <section id="company-info" class="company-info">
+            <div class="loading-indicator">Loading company information...</div>
+            <div class="company-header">
+                <div class="company-logo-container">
+                    <img id="company-logo" src="images/placeholder-logo.svg" alt="Company Logo">
+                </div>
+                <div class="company-details">
+                    <h1 id="company-name">Company Name</h1>
+                    <p id="company-description">Company description will appear here.</p>
+                    <p>Website: <a id="company-website" href="#" target="_blank">Company Website</a></p>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="refresh-data" class="btn btn-secondary">Refresh Data</button>
+            </div>
+        </section>
+        
+        <section class="performances-section">
+            <h2>Current Performances</h2>
+            <div class="loading-indicator">Loading performances...</div>
+            <div id="current-performances" class="performances-grid">
+                <!-- Performance cards will be inserted here -->
+            </div>
+        </section>
+        
+        <section class="performances-section">
+            <h2>Upcoming Performances</h2>
+            <div class="loading-indicator">Loading performances...</div>
+            <div id="upcoming-performances" class="performances-grid">
+                <!-- Performance cards will be inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 World Ballets. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script src="js/ballet-data-service.js"></script>
+    <script src="js/ui-controllers/company-page.js"></script>
+</body>
+</html>

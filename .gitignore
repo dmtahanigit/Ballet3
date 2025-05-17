@@ -46,3 +46,14 @@ Thumbs.db
 # Debug files
 debug_*.html
 debug_*.png
+
+# MongoDB connection diagnosis files
+*mongo_test_results.txt
+*direct_connection_results.txt
+file_mongo_test.py
+simple_mongo_test.py
+test_mongo_connection.py
+test_direct_connection.py
+test_direct_connection_file.py
+mongodb_connection_diagnosis.md
+mongodb_connection_final_report.md

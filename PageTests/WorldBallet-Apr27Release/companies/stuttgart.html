@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stuttgart Ballet - World Ballets</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/company-page.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo-container">
+            <h1><a href="../index.html">WORLD BALLETS</a></h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="abt.html" class="company-logo">ABT</a></li>
+                <li><a href="pob.html" class="company-logo">POB</a></li>
+                <li><a href="bolshoi.html" class="company-logo">BOLSHOI</a></li>
+                <li><a href="royal.html" class="company-logo">ROYAL</a></li>
+                <li><a href="stuttgart.html" class="company-logo active">STUTTGART</a></li>
+                <li><a href="boston.html" class="company-logo">BOSTON</a></li>
+                <li><a href="nbc.html" class="company-logo">NBC</a></li>
+                <li><a href="rb.html" class="company-logo">RB</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="company-hero">
+        <div class="company-info">
+            <div class="company-logo-container">
+                <img src="https://via.placeholder.com/150x150.png?text=Stuttgart+Ballet+Logo" alt="Stuttgart Ballet Logo" class="company-logo-img">
+            </div>
+            <h1>STUTTGART BALLET</h1>
+            <p class="company-description">
+                The Stuttgart Ballet is one of the world's leading ballet companies with a rich history dating back to the 18th century. Under the direction of Tamas Detrich, the company continues its tradition of excellence in classical ballet while embracing contemporary works. Based in Stuttgart, Germany, the company is known for its versatile dancers and diverse repertoire.
+            </p>
+        </div>
+    </section>
+
+    <section class="current-performances">
+        <h2>NOW PLAYING & UPCOMING PERFORMANCES</h2>
+        
+        <div class="performance-container" id="currentPerformances">
+            <!-- Performances will be populated by JavaScript -->
+            <div class="loading-indicator">Loading performances...</div>
+        </div>
+    </section>
+
+    <section class="past-performances">
+        <h2>PAST PERFORMANCES</h2>
+        <button class="toggle-past-btn" id="togglePastBtn">Show Past Performances</button>
+        
+        <div class="performance-container hidden" id="pastPerformances">
+            <!-- Past performances will be populated by JavaScript -->
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 World Ballets. All rights reserved.</p>
+            <p>Data sourced from official ballet company websites.</p>
+        </div>
+    </footer>
+
+    <script src="../js/scraper.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/data-service.js"></script>
+    <script src="../js/ui-controller.js"></script>
+    <script src="../js/company-page.js"></script>
+</body>
+</html>

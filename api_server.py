@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -14,11 +14,22 @@ CORS(app)
 # MongoDB connection with SSL settings
 MONGODB_URI = os.getenv('MONGODB_URI')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
-COLLECTION_NAME = os.getenv('COLLECTION_NAME')
+POB_COLLECTION_NAME = os.getenv('COLLECTION_NAME', 'paris_opera_ballet')
+BOLSHOI_COLLECTION_NAME = os.getenv('BOLSHOI_COLLECTION_NAME', 'bolshoi_ballet')
 
 client = MongoClient(MONGODB_URI)
 db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
+
+# Collections for different ballet companies
+pob_collection = db[POB_COLLECTION_NAME]
+bolshoi_collection = db[BOLSHOI_COLLECTION_NAME]
+
+# Helper function to get the appropriate collection based on company name
+def get_collection(company):
+    if company == 'bolshoi-ballet':
+        return bolshoi_collection
+    else:  # Default to Paris Opera Ballet
+        return pob_collection
 
 @app.route('/api/companies/paris-opera-ballet', methods=['GET'])
 def get_company_info():
@@ -26,7 +37,7 @@ def get_company_info():
         return jsonify({
             'name': 'Paris Opera Ballet',
             'description': 'The Paris Opera Ballet is the oldest national ballet company in the world, founded in 1669. It is the ballet company of the Paris Opera and is one of the most prestigious ballet companies in the world.',
-            'logo': 'images/pob-logo.png'
+            'logo': 'images/logos/pob-logo.png'
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -322,27 +333,241 @@ def transform_performance(performance):
     
     return transformed
 
-@app.route('/api/companies/paris-opera-ballet/performances', methods=['GET'])
-def get_performances():
+def transform_bolshoi_performance(performance):
+    """
+    Transform Bolshoi performance data from database format to frontend expected format.
+    
+    This function is similar to transform_performance but with adjustments for Bolshoi data.
+    """
+    # Create a copy to avoid modifying the original
+    transformed = performance.copy()
+    
+    # Handle date parsing for Bolshoi format
+    if 'date' in performance and performance['date']:
+        date_str = performance['date']
+        
+        # Pattern for dates like "23 – 25 May 2025"
+        date_range_pattern = re.compile(r'(\d+)\s*[–-]\s*(\d+)\s+([A-Za-z]+)\s+(\d{4})')
+        match = date_range_pattern.search(date_str)
+        
+        if match:
+            day_start = match.group(1)
+            day_end = match.group(2)
+            month = match.group(3)
+            year = match.group(4)
+            
+            try:
+                start_date_str = f"{day_start} {month} {year}"
+                end_date_str = f"{day_end} {month} {year}"
+                
+                for fmt in ["%d %B %Y", "%d %b %Y"]:
+                    try:
+                        start_date = datetime.strptime(start_date_str, fmt)
+                        transformed['startDate'] = start_date.strftime("%Y-%m-%d")
+                        break
+                    except ValueError:
+                        continue
+                
+                for fmt in ["%d %B %Y", "%d %b %Y"]:
+                    try:
+                        end_date = datetime.strptime(end_date_str, fmt)
+                        transformed['endDate'] = end_date.strftime("%Y-%m-%d")
+                        break
+                    except ValueError:
+                        continue
+            except Exception as e:
+                print(f"Error parsing Bolshoi date range '{date_str}': {e}")
+        else:
+            # Try other date formats
+            # Pattern for dates like "19 September 2024 – 23 March 2025"
+            full_range_pattern = re.compile(r'(\d+\s+[A-Za-z]+\s+\d{4})\s*[–-]\s*(\d+\s+[A-Za-z]+\s+\d{4})')
+            match = full_range_pattern.search(date_str)
+            
+            if match:
+                start_date_str = match.group(1)
+                end_date_str = match.group(2)
+                
+                try:
+                    for fmt in ["%d %B %Y", "%d %b %Y"]:
+                        try:
+                            start_date = datetime.strptime(start_date_str, fmt)
+                            transformed['startDate'] = start_date.strftime("%Y-%m-%d")
+                            break
+                        except ValueError:
+                            continue
+                    
+                    for fmt in ["%d %B %Y", "%d %b %Y"]:
+                        try:
+                            end_date = datetime.strptime(end_date_str, fmt)
+                            transformed['endDate'] = end_date.strftime("%Y-%m-%d")
+                            break
+                        except ValueError:
+                            continue
+                except Exception as e:
+                    print(f"Error parsing Bolshoi full date range '{date_str}': {e}")
+            else:
+                # Fallback to year extraction
+                year_match = re.search(r'\d{4}', date_str) if date_str else None
+                year = year_match.group(0) if year_match else str(datetime.now().year)
+                
+                # Default to the entire year if no specific dates
+                transformed['startDate'] = f"{year}-01-01"
+                transformed['endDate'] = f"{year}-12-31"
+    
+    # Ensure description is properly handled
+    if 'description' not in transformed or not transformed['description']:
+        # Add default descriptions for known Bolshoi ballets
+        if performance.get('title') == "Swan Lake":
+            transformed['description'] = "Swan Lake is one of the most iconic classical ballets, featuring Tchaikovsky's magnificent score. The Bolshoi Theatre's production showcases the company's technical brilliance and artistic expression through the demanding choreography that has captivated audiences for generations."
+        elif performance.get('title') == "The Nutcracker":
+            transformed['description'] = "The Nutcracker is a classic holiday ballet that tells the story of Clara, who receives a nutcracker doll as a gift and enters a magical world where the Nutcracker and other characters come to life. This enchanting performance features iconic music by Tchaikovsky and is a beloved tradition of the Bolshoi Theatre."
+        elif performance.get('title') == "Giselle":
+            transformed['description'] = "Giselle is a romantic ballet that tells the story of a peasant girl who dies of a broken heart after discovering her lover is betrothed to another. The Bolshoi Theatre's production highlights the ethereal quality of the second act, where Giselle becomes one of the Wilis, spirits of maidens who died before their wedding day."
+        elif performance.get('title') == "Romeo and Juliet":
+            transformed['description'] = "The Bolshoi Theatre presents Shakespeare's timeless tale of star-crossed lovers through expressive choreography and Prokofiev's powerful score. This production captures the passion, drama, and tragedy of one of the world's greatest love stories."
+        elif performance.get('title') == "La Bayadère":
+            transformed['description'] = "La Bayadère is a dramatic ballet that tells the story of the temple dancer Nikiya and the warrior Solor, who pledge their eternal love to each other. The Bolshoi Theatre's production is known for its spectacular 'Kingdom of the Shades' scene, featuring the corps de ballet in perfect synchronization."
+        elif performance.get('title') == "Don Quixote":
+            transformed['description'] = "Don Quixote is a vibrant, colorful ballet based on episodes from Cervantes' famous novel. The Bolshoi Theatre's production is full of Spanish-inspired dancing, featuring the love story of Kitri and Basilio alongside Don Quixote's quest for his ideal woman."
+        else:
+            transformed['description'] = f"This performance of {performance.get('title', 'this ballet')} by the Bolshoi Theatre showcases the company's artistic excellence and technical precision. The Bolshoi Theatre is one of the world's premier ballet companies, known for its grand productions and virtuosic dancers."
+    
+    # Add composer information to description if available
+    if 'composer' in performance and performance['composer'] and 'description' in transformed:
+        composer_info = performance['composer']
+        if not composer_info in transformed['description']:
+            transformed['description'] = f"{transformed['description']} Music by {composer_info}."
+    
+    # Map fields to match frontend expectations
+    if 'age_restriction' in performance:
+        transformed['ageRestriction'] = performance['age_restriction']
+    
+    if 'ballet_type' in performance:
+        transformed['balletType'] = performance['ballet_type']
+    
+    # Ensure all required fields exist
+    required_fields = {
+        'id': performance.get('url', performance.get('_id', f"bolshoi_{hash(performance.get('title', 'unknown'))}")),
+        'title': performance.get('title', 'Untitled Performance'),
+        'image': performance.get('thumbnail', performance.get('image', 'placeholder.jpg')),
+        'venue': performance.get('venue', 'Bolshoi Theatre'),
+        'videoUrl': '',
+        'isCurrent': False,
+        'isNext': False,
+        'isPast': False,
+        'company': 'Bolshoi Ballet'
+    }
+    
+    # Add any missing required fields
+    for field, default_value in required_fields.items():
+        if field not in transformed or not transformed[field]:
+            transformed[field] = default_value
+    
+    # Calculate if performance is past, current, or upcoming
     try:
-        raw_performances = list(collection.find({}, {'_id': 0}))
+        if 'startDate' in transformed and 'endDate' in transformed:
+            today = datetime.now().date()
+            start_date = datetime.strptime(transformed['startDate'], "%Y-%m-%d").date()
+            end_date = datetime.strptime(transformed['endDate'], "%Y-%m-%d").date()
+            
+            transformed['isPast'] = end_date < today
+            transformed['isCurrent'] = start_date <= today <= end_date
+            transformed['isNext'] = start_date > today and (start_date - today).days <= 30
+    except Exception as e:
+        print(f"Error calculating Bolshoi performance timing: {e}")
+    
+    return transformed
+
+@app.route('/api/companies/paris-opera-ballet/performances', methods=['GET'])
+def get_pob_performances():
+    try:
+        raw_performances = list(pob_collection.find({}, {'_id': 0}))
         transformed_performances = [transform_performance(p) for p in raw_performances]
         return jsonify(transformed_performances)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/companies/bolshoi-ballet', methods=['GET'])
+def get_bolshoi_company_info():
+    try:
+        return jsonify({
+            'name': 'Bolshoi Ballet',
+            'description': 'The Bolshoi Ballet is one of the oldest and most prestigious ballet companies in the world, based at the Bolshoi Theatre in Moscow, Russia. Founded in 1776, it is recognized globally for its grand scale productions, virtuosic dancers, and rich artistic tradition.',
+            'logo': 'images/logos/bolshoi-logo.png'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/companies/bolshoi-ballet/performances', methods=['GET'])
+def get_bolshoi_performances():
+    try:
+        raw_performances = list(bolshoi_collection.find({}, {'_id': 0}))
+        transformed_performances = [transform_bolshoi_performance(p) for p in raw_performances]
+        return jsonify(transformed_performances)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/companies/all/performances', methods=['GET'])
+def get_all_performances():
+    """Get performances from all ballet companies"""
+    try:
+        # Get performances from Paris Opera Ballet
+        pob_performances = list(pob_collection.find({}, {'_id': 0}))
+        transformed_pob = [transform_performance(p) for p in pob_performances]
+        
+        # Get performances from Bolshoi Ballet
+        bolshoi_performances = list(bolshoi_collection.find({}, {'_id': 0}))
+        transformed_bolshoi = [transform_bolshoi_performance(p) for p in bolshoi_performances]
+        
+        # Combine all performances
+        all_performances = transformed_pob + transformed_bolshoi
+        
+        return jsonify(all_performances)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/companies', methods=['GET'])
+def get_all_companies():
+    """Get information about all ballet companies"""
+    try:
+        companies = [
+            {
+                'id': 'paris-opera-ballet',
+                'name': 'Paris Opera Ballet',
+                'description': 'The Paris Opera Ballet is the oldest national ballet company in the world, founded in 1669. It is the ballet company of the Paris Opera and is one of the most prestigious ballet companies in the world.',
+                'logo': 'images/logos/pob-logo.png'
+            },
+            {
+                'id': 'bolshoi-ballet',
+                'name': 'Bolshoi Ballet',
+                'description': 'The Bolshoi Ballet is one of the oldest and most prestigious ballet companies in the world, based at the Bolshoi Theatre in Moscow, Russia. Founded in 1776, it is recognized globally for its grand scale productions, virtuosic dancers, and rich artistic tradition.',
+                'logo': 'images/logos/bolshoi-logo.png'
+            }
+        ]
+        return jsonify(companies)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/debug/performance-transformation', methods=['GET'])
 def debug_transformation():
     try:
+        # Get company from query parameter
+        company = request.args.get('company', 'paris-opera-ballet')
+        collection = get_collection(company)
+        
         # Get a sample performance
         sample = collection.find_one({}, {'_id': 0})
         if not sample:
-            return jsonify({"error": "No performances found in database"})
+            return jsonify({"error": f"No performances found in database for {company}"})
             
         # Show before and after
-        transformed = transform_performance(sample)
+        if company == 'bolshoi-ballet':
+            transformed = transform_bolshoi_performance(sample)
+        else:
+            transformed = transform_performance(sample)
         
         return jsonify({
+            "company": company,
             "original": sample,
             "transformed": transformed,
             "fields_added": [k for k in transformed if k not in sample],
@@ -355,11 +580,15 @@ def debug_transformation():
 def debug_description():
     """Lightweight endpoint that returns only description data for testing"""
     try:
+        # Get company from query parameter
+        company = request.args.get('company', 'paris-opera-ballet')
+        collection = get_collection(company)
+        
         # Get all performances but only retrieve the description field
         performances = list(collection.find({}, {'_id': 0, 'description': 1, 'title': 1}))
         
         if not performances:
-            return jsonify({"error": "No performances found in database"})
+            return jsonify({"error": f"No performances found in database for {company}"})
         
         # Create a lightweight response with just the essential information
         results = []
